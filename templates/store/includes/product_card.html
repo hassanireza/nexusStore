@@ -1,0 +1,63 @@
+{% load static store_tags %}
+<div class="product-card">
+  <div class="product-card-badges">
+    {% if product.is_deal_of_day %}<span class="badge-deal">DEAL</span>{% endif %}
+    {% if product.is_featured and not product.is_deal_of_day %}<span class="badge-featured">FEATURED</span>{% endif %}
+    {% if product.discount_percentage %}<span class="badge-discount">-{{ product.discount_percentage }}%</span>{% endif %}
+  </div>
+  {% if user.is_authenticated %}
+  <button class="product-card-wishlist ajax-wishlist" data-product-id="{{ product.id }}" title="Save to wishlist">
+    <i class="bi bi-heart"></i>
+  </button>
+  {% endif %}
+  <a href="{{ product.get_absolute_url }}">
+    <div class="product-card-img">
+      {% product_img_url product as img_src %}
+      {% if img_src %}
+        <img src="{{ img_src }}" alt="{{ product.name }}" loading="lazy" />
+      {% else %}
+        <span class="product-placeholder-icon">
+          {% if 'phone' in product.category.slug or 'smart' in product.category.slug %}&#128241;
+          {% elif 'laptop' in product.category.slug %}&#128187;
+          {% elif 'camera' in product.category.slug %}&#128247;
+          {% else %}&#128246;{% endif %}
+        </span>
+      {% endif %}
+    </div>
+  </a>
+  <div class="product-card-body">
+    {% if product.brand %}<div class="product-card-brand">{{ product.brand.name }}</div>{% endif %}
+    <a href="{{ product.get_absolute_url }}" style="color:inherit;text-decoration:none">
+      <div class="product-card-name">{{ product.name }}</div>
+    </a>
+    <div class="product-card-rating">
+      {% if product.review_count > 0 %}
+        <span class="stars">
+          {% for i in "12345" %}{% if forloop.counter <= product.avg_rating %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}{% endfor %}
+        </span>
+        <span class="rating-count">({{ product.review_count }})</span>
+      {% else %}
+        <span class="rating-count" style="font-size:12px;color:var(--text-muted)">No reviews yet</span>
+      {% endif %}
+    </div>
+    <div class="product-card-footer">
+      <div class="price-block">
+        <div class="price-current">${{ product.price }}</div>
+        {% if product.compare_price %}
+        <div class="price-old">${{ product.compare_price }}</div>
+        <div class="price-save">Save ${{ product.savings|floatformat:0 }}</div>
+        {% endif %}
+      </div>
+      {% if product.in_stock %}
+      <form method="POST" action="{% url 'store:add_to_cart' product.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-add-cart ajax-add-cart" data-product-id="{{ product.id }}" title="Add to cart">
+          <i class="bi bi-bag-plus"></i>
+        </button>
+      </form>
+      {% else %}
+      <span style="font-size:11px;color:var(--danger);font-weight:600">Out of Stock</span>
+      {% endif %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} — NEXUS Academy{% endblock %}
+{% block meta_description %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+{% block content %}
+<div class="page-breadcrumb"><div class="container-xl"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'store:home' %}">Home</a></li><li class="breadcrumb-item"><a href="{% url 'blog:academy_home' %}">Academy</a></li><li class="breadcrumb-item active">{{ post.title|truncatechars:40 }}</li></ol></div></div>
+<div class="container-xl py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      {% if post.category %}<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:10px">{{ post.category.name }}</div>{% endif %}
+      <h1 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:16px">{{ post.title }}</h1>
+      <div class="d-flex align-items-center gap-3 mb-4" style="font-size:13px;color:var(--text-muted)">
+        <span><i class="bi bi-person me-1"></i>{{ post.author.get_full_name|default:post.author.username }}</span>
+        <span><i class="bi bi-calendar me-1"></i>{{ post.published_at|date:"M d, Y" }}</span>
+        <span><i class="bi bi-clock me-1"></i>{{ post.read_time }} min read</span>
+        <span><i class="bi bi-eye me-1"></i>{{ post.views }} views</span>
+      </div>
+      {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-100 rounded-3 mb-4" style="max-height:400px;object-fit:cover" />{% endif %}
+      <div class="post-content" style="font-size:16px;line-height:1.8;color:var(--text-secondary)">{{ post.content|linebreaks }}</div>
+
+      {% if related %}
+      <hr class="my-5" />
+      <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:20px">Related Articles</h3>
+      <div class="row g-3">
+        {% for rp in related %}
+        <div class="col-md-4">
+          <div class="post-card">
+            <div class="post-card-img" style="height:120px">{% if rp.featured_image %}<img src="{{ rp.featured_image.url }}" alt="{{ rp.title }}" />{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--surface-2)">📰</div>{% endif %}</div>
+            <div class="post-card-body" style="padding:12px"><a href="{{ rp.get_absolute_url }}" style="color:inherit;text-decoration:none"><h3 class="post-card-title" style="font-size:13px">{{ rp.title }}</h3></a></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

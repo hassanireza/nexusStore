@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}My Orders — NEXUS{% endblock %}
+{% block content %}
+<div class="container-xl py-4">
+  <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:24px">Order History</h1>
+  {% if orders %}
+  {% for order in orders %}
+  <div class="checkout-card mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div><div class="fw-bold">Order #{{ order.order_number }}</div><div class="text-muted small">Placed {{ order.created_at|date:"M d, Y" }}</div></div>
+      <div class="d-flex gap-3 align-items-center"><span class="fw-bold">${{ order.total }}</span><span class="order-status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></div>
+    </div>
+    {% for item in order.items.all %}
+    <div class="d-flex justify-content-between small border-bottom pb-2 mb-2">
+      <span>{{ item.product_name }} &times;{{ item.quantity }}</span>
+      <span class="fw-semibold">${{ item.total_price }}</span>
+    </div>
+    {% endfor %}
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <span class="text-muted small">{{ order.full_name }} &bull; {{ order.city }}, {{ order.country }}</span>
+      <span class="fw-bold">Total: ${{ order.total }}</span>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="text-center py-5">
+    <div style="font-size:3rem;margin-bottom:16px">📦</div>
+    <h5>No orders yet</h5>
+    <p class="text-muted">Start shopping to see your orders here.</p>
+    <a href="{% url 'store:product_list' %}" class="btn-primary-custom mt-2">Shop Now</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

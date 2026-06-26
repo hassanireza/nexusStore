@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{% block meta_description %}NEXUS — Premium tech products: smartphones, laptops, cameras. Best prices, fast shipping.{% endblock %}" />
+  <title>{% block title %}NEXUS — Premium Tech Store{% endblock %}</title>
+  {% load static %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="container-xl">
+    <div class="d-flex justify-content-between align-items-center py-1">
+      <span class="topbar-text"><i class="bi bi-truck me-1"></i>Free shipping on orders over $99</span>
+      <div class="d-flex gap-3 align-items-center">
+        <a href="{% url 'blog:academy_home' %}" class="topbar-link"><i class="bi bi-mortarboard me-1"></i>Academy</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:profile' %}" class="topbar-link">{{ user.first_name|default:user.username }}</a>
+          <a href="{% url 'logout' %}" class="topbar-link">Sign out</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="topbar-link">Sign in</a>
+          <a href="{% url 'accounts:register' %}" class="topbar-link">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Header -->
+<header class="main-header sticky-top">
+  <div class="container-xl">
+    <nav class="navbar navbar-expand-lg py-0">
+      <a class="navbar-brand nexus-logo" href="{% url 'store:home' %}">
+        <span class="logo-n">N</span>EXUS
+      </a>
+
+      <!-- Search -->
+      <div class="header-search flex-grow-1 mx-4 d-none d-lg-block">
+        <form action="{% url 'store:product_list' %}" method="GET">
+          <div class="search-wrapper">
+            <select name="category" class="search-cat-select">
+              <option value="">All</option>
+              {% for cat in nav_categories %}
+              <option value="{{ cat.slug }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+            <input type="text" name="q" class="search-input" placeholder="Search products, brands, models..." value="{{ request.GET.q }}" />
+            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="header-actions d-flex align-items-center gap-2 ms-auto">
+        {% if user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="header-action-btn" title="Profile">
+          <i class="bi bi-person-circle"></i>
+          <span class="d-none d-xl-inline">Account</span>
+        </a>
+        <a href="{% url 'store:wishlist' %}" class="header-action-btn" title="Wishlist">
+          <i class="bi bi-heart"></i>
+          <span class="d-none d-xl-inline">Wishlist</span>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="header-action-btn" title="Sign in">
+          <i class="bi bi-person"></i>
+          <span class="d-none d-xl-inline">Sign In</span>
+        </a>
+        {% endif %}
+        <a href="{% url 'store:cart' %}" class="header-action-btn cart-btn" title="Cart">
+          <i class="bi bi-bag"></i>
+          <span class="d-none d-xl-inline">Cart</span>
+          {% if cart_count > 0 %}
+          <span class="cart-badge">{{ cart_count }}</span>
+          {% endif %}
+        </a>
+      </div>
+
+      <button class="navbar-toggler ms-2 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <i class="bi bi-list fs-4 text-white"></i>
+      </button>
+    </nav>
+
+    <!-- Mobile Search -->
+    <div class="d-lg-none pb-2">
+      <form action="{% url 'store:product_list' %}" method="GET">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search..." />
+          <button class="btn btn-warning" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Category Nav -->
+  <div class="cat-nav">
+    <div class="container-xl">
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="cat-nav-list">
+          <li><a href="{% url 'store:product_list' %}"><i class="bi bi-grid me-1"></i>All Products</a></li>
+          {% for cat in nav_categories %}
+          <li><a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a></li>
+          {% endfor %}
+          <li><a href="{% url 'store:product_list' %}?sort=newest">New Arrivals</a></li>
+          <li><a href="{% url 'store:product_list' %}?deal=1" class="deal-link"><i class="bi bi-lightning-fill me-1"></i>Deals</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Messages -->
+{% if messages %}
+<div class="messages-container">
+  <div class="container-xl">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Toast notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+  <div id="cartToast" class="toast align-items-center text-bg-dark border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastMessage">Item added to cart!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<main>{% block content %}{% endblock %}</main>
+
+<!-- Footer -->
+<footer class="site-footer mt-5">
+  <div class="footer-top">
+    <div class="container-xl">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <a class="nexus-logo-footer" href="{% url 'store:home' %}"><span class="logo-n">N</span>EXUS</a>
+          <p class="footer-desc mt-3">Your premium destination for the latest tech. Smartphones, laptops, cameras — curated, tested, delivered fast.</p>
+          <div class="social-links mt-3">
+            <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
+            <a href="#" class="social-link"><i class="bi bi-tiktok"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Shop</h6>
+          <ul class="footer-links">
+            {% for cat in nav_categories %}
+            <li><a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a></li>
+            {% endfor %}
+            <li><a href="{% url 'store:product_list' %}?deal=1">Deals</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Account</h6>
+          <ul class="footer-links">
+            <li><a href="{% url 'accounts:profile' %}">My Profile</a></li>
+            <li><a href="{% url 'accounts:order_history' %}">My Orders</a></li>
+            <li><a href="{% url 'store:wishlist' %}">Wishlist</a></li>
+            <li><a href="{% url 'store:cart' %}">Shopping Cart</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Help</h6>
+          <ul class="footer-links">
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">Track Order</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Academy</h6>
+          <ul class="footer-links">
+            <li><a href="{% url 'blog:academy_home' %}">Tech Blog</a></li>
+            <li><a href="{% url 'blog:academy_home' %}">Buying Guides</a></li>
+            <li><a href="{% url 'blog:academy_home' %}">Reviews</a></li>
+            <li><a href="{% url 'blog:academy_home' %}">Tutorials</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container-xl d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <p class="mb-0 small">&copy; 2025 NEXUS Store. All rights reserved.</p>
+      <div class="payment-icons d-flex gap-2 align-items-center">
+        <span class="payment-badge">VISA</span>
+        <span class="payment-badge">MC</span>
+        <span class="payment-badge">AMEX</span>
+        <span class="payment-badge">PayPal</span>
+        <span class="payment-badge">Apple Pay</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

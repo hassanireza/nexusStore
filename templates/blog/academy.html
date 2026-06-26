@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}NEXUS Academy — Tech Guides, Reviews & News{% endblock %}
+{% block content %}
+<div class="academy-hero">
+  <div class="container-xl">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:12px">NEXUS Academy</div>
+        <h1 style="font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:#fff;margin-bottom:12px">Learn. Explore. <span style="color:var(--primary)">Decide.</span></h1>
+        <p style="color:rgba(255,255,255,.7);font-size:16px;max-width:480px">Expert buying guides, in-depth reviews, and the latest tech news — all in one place.</p>
+      </div>
+      <div class="col-lg-5">
+        {% if featured %}
+        <a href="{{ featured.get_absolute_url }}" class="d-block rounded-3 overflow-hidden" style="text-decoration:none">
+          {% if featured.featured_image %}<img src="{{ featured.featured_image.url }}" alt="{{ featured.title }}" style="width:100%;height:220px;object-fit:cover;border-radius:12px" />{% endif %}
+          <div class="p-3" style="background:rgba(255,255,255,.06);border-radius:0 0 12px 12px;backdrop-filter:blur(8px)">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:4px">{{ featured.category.name|default:"Featured" }}</div>
+            <div style="color:#fff;font-weight:700;font-size:15px">{{ featured.title }}</div>
+            <div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:4px">{{ featured.read_time }} min read &bull; {{ featured.views }} views</div>
+          </div>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-xl py-5">
+  {% if categories %}
+  <div class="d-flex gap-2 flex-wrap mb-4">
+    <a href="{% url 'blog:academy_home' %}" class="btn btn-sm" style="background:var(--primary);color:#fff;border-radius:20px">All</a>
+    {% for cat in categories %}<a href="{% url 'blog:academy_home' %}?cat={{ cat.slug }}" class="btn btn-sm btn-outline-secondary" style="border-radius:20px">{{ cat.name }}</a>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if posts %}
+  <div class="row g-4">
+    {% for post in posts %}
+    <div class="col-md-6 col-lg-4">
+      <div class="post-card">
+        <div class="post-card-img">
+          {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" />
+          {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;background:var(--surface-2)">📰</div>{% endif %}
+        </div>
+        <div class="post-card-body">
+          <div class="post-card-category">{{ post.category.name|default:"Tech" }}</div>
+          <a href="{{ post.get_absolute_url }}" style="color:inherit;text-decoration:none"><h3 class="post-card-title">{{ post.title }}</h3></a>
+          <p class="post-card-excerpt">{{ post.excerpt|truncatechars:100 }}</p>
+          <div class="post-card-meta">
+            <span><i class="bi bi-person me-1"></i>{{ post.author.get_full_name|default:post.author.username }}</span>
+            <span><i class="bi bi-clock me-1"></i>{{ post.read_time }} min</span>
+            <span><i class="bi bi-eye me-1"></i>{{ post.views }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if posts.has_other_pages %}
+  <nav class="mt-4"><ul class="pagination justify-content-center">
+    {% if posts.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ posts.previous_page_number }}">‹</a></li>{% endif %}
+    {% for n in posts.paginator.page_range %}<li class="page-item {% if posts.number == n %}active{% endif %}"><a class="page-link" href="?page={{ n }}">{{ n }}</a></li>{% endfor %}
+    {% if posts.has_next %}<li class="page-item"><a class="page-link" href="?page={{ posts.next_page_number }}">›</a></li>{% endif %}
+  </ul></nav>
+  {% endif %}
+  {% else %}
+  <div class="text-center py-5">
+    <div style="font-size:3rem;margin-bottom:16px">📝</div>
+    <h5>No articles yet</h5>
+    <p class="text-muted">Check back soon — great content is coming!</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

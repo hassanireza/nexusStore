@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static store_tags %}
+{% block title %}Shopping Cart — NEXUS{% endblock %}
+{% block content %}
+<div class="page-breadcrumb"><div class="container-xl"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'store:home' %}">Home</a></li><li class="breadcrumb-item active">Cart</li></ol></div></div>
+<div class="container-xl py-4">
+  <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:24px">
+    Shopping Cart {% if cart.total_items %}<span style="font-size:1rem;color:var(--text-muted);font-weight:400">({{ cart.total_items }} item{{ cart.total_items|pluralize }})</span>{% endif %}
+  </h1>
+  {% if cart.items.all %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% for item in cart.items.all %}
+      <div class="cart-item">
+        {% product_img_url item.product as ci_img %}
+        {% if ci_img %}
+          <img src="{{ ci_img }}" alt="{{ item.product.name }}" class="cart-item-img" />
+        {% else %}
+          <div class="cart-item-img d-flex align-items-center justify-content-center" style="font-size:1.8rem">&#128246;</div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <a href="{{ item.product.get_absolute_url }}" style="color:inherit;text-decoration:none">
+            <div class="cart-item-name">{{ item.product.name }}</div>
+          </a>
+          {% if item.product.brand %}<div class="text-muted small mb-1">{{ item.product.brand.name }}</div>{% endif %}
+          <div class="cart-item-price">${{ item.product.price }}</div>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-2">
+          <form method="POST" action="{% url 'store:update_cart' item.id %}" class="d-flex align-items-center gap-2">
+            {% csrf_token %}
+            <div class="qty-control" style="border-radius:6px">
+              <button type="button" class="qty-btn" data-action="dec" style="width:30px;height:34px;font-size:14px">−</button>
+              <input type="number" name="quantity" class="qty-input" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" style="width:42px;height:34px;font-size:13px" />
+              <button type="button" class="qty-btn" data-action="inc" style="width:30px;height:34px;font-size:14px">+</button>
+            </div>
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
+          </form>
+          <div style="font-weight:800;font-size:16px">${{ item.total_price }}</div>
+          <form method="POST" action="{% url 'store:remove_from_cart' item.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-link text-danger p-0" onclick="return confirm('Remove this item?')">
+              <i class="bi bi-trash me-1"></i>Remove
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="col-lg-4">
+      <div class="order-summary">
+        <div class="order-summary-title">Order Summary</div>
+        <div class="summary-row"><span>Subtotal</span><span>${{ cart.subtotal }}</span></div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span>{% if cart.subtotal >= 99 %}<span class="text-success fw-semibold">Free</span>{% else %}$9.99{% endif %}</span>
+        </div>
+        <div class="summary-row summary-total"><span>Total</span><span>${{ cart.total }}</span></div>
+        <a href="{% url 'store:checkout' %}" class="btn-primary-custom w-100 mt-3" style="justify-content:center;padding:14px">
+          <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+        </a>
+        <a href="{% url 'store:product_list' %}" class="btn-outline-custom w-100 mt-2" style="justify-content:center">Continue Shopping</a>
+        <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+          <span class="payment-badge" style="background:var(--surface-3);color:var(--text-muted)">VISA</span>
+          <span class="payment-badge" style="background:var(--surface-3);color:var(--text-muted)">Mastercard</span>
+          <span class="payment-badge" style="background:var(--surface-3);color:var(--text-muted)">PayPal</span>
+          <span class="payment-badge" style="background:var(--surface-3);color:var(--text-muted)">Apple Pay</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <div style="font-size:4rem;margin-bottom:16px">&#128722;</div>
+    <h5>Your cart is empty</h5>
+    <p class="text-muted">Add some products to get started.</p>
+    <a href="{% url 'store:product_list' %}" class="btn-primary-custom mt-2">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
