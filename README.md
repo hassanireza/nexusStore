@@ -7,7 +7,7 @@
 <h1 align="center">NEXUS Store</h1>
 
 <p align="center">
-Production-ready Django e-commerce platform designed with a modern product experience.
+Production-ready Django e-commerce platform.
 </p>
 
 <p align="center">
