@@ -150,14 +150,21 @@ class Command(BaseCommand):
                     meta_description=d['short'][:155],
                 )
 
-                # Attach SVG images
+                # Attach product images (prefer real photo formats, fall back to SVG placeholder)
                 for j in range(5):
-                    img_path = os.path.join(img_base, f'{cat_slug}_{i+1}_view{j+1}.svg')
-                    if os.path.exists(img_path):
+                    img_path = None
+                    ext = None
+                    for candidate_ext in ('webp', 'jpg', 'jpeg', 'png', 'svg'):
+                        candidate = os.path.join(img_base, f'{cat_slug}_{i+1}_view{j+1}.{candidate_ext}')
+                        if os.path.exists(candidate):
+                            img_path = candidate
+                            ext = candidate_ext
+                            break
+                    if img_path:
                         with open(img_path, 'rb') as f:
                             from django.core.files import File as DjangoFile
                             pi = ProductImage(product=p, is_primary=(j == 0), order=j, alt_text=f'{p.name} view {j+1}')
-                            pi.image.save(f'{cat_slug}_{i+1}_v{j+1}.svg', DjangoFile(f), save=True)
+                            pi.image.save(f'{cat_slug}_{i+1}_v{j+1}.{ext}', DjangoFile(f), save=True)
                     else:
                         ProductImage.objects.create(product=p, is_primary=(j == 0), order=j)
 
