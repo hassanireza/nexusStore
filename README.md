@@ -1,7 +1,7 @@
 # NEXUS Store
 
 <p align="center">
-  <img src="./assets/banner.png" width="100%" alt="Nexus Store">
+  <img src="./assets/nexusStoreBanner.webp" width="100%" alt="Nexus Store">
 </p>
 
 <h1 align="center">NEXUS Store</h1>
